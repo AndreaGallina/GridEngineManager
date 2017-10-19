@@ -27,14 +27,14 @@ if you want the package to be automatically added to the dependencies section of
 
 First, import the scheduler and the ndrmaa session manager:
 
-```
+```javascript
 var SchedulerFactory = require("ndrmaa").SchedulerFactory;
 var SessionManager = require("ndrmaa").SessionManager;
 ```
 
 Once imported, you will be able to instantiate SchedulerFactory and SessionManager instances like this:
 
-```
+```javascript
 var sf = new SchedulerFactory();
 var sm = new SessionManager();
 ```

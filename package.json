@@ -1,0 +1,25 @@
+{
+  "name": "ndrmaa",
+  "version": "1.0.5",
+  "description": "A NodeJS DRMAA for Sun Grid Engine.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "drmaa",
+    "sge"
+  ],
+  "author": "Andrea Gallina, Marco Andrea Speronello",
+  "contributors": [
+    {
+      "name": "Andrea Gallina",
+      "email": "gallina.andrea58@yahoo.it"
+    },
+    {
+      "name": "Marco Andrea Speronello",
+      "email": "marco@speronello.com"
+    }
+  ],
+  "license": "ISC"
+}

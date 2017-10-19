@@ -11,14 +11,32 @@ nDrmaa includes a library, which adheres to Drmaa standards for the most part, u
 
 Standard installation via npm:
 
+```
 npm install ndrmaa
+```
 
 or
 
+```
 npm install ndrmaa --save 
+```
 
 if you want the package to be automatically added to the dependencies section of your package.json file.
 
 ### USAGE
+
+First, import the scheduler and the ndrmaa session manager:
+
+```
+var SchedulerFactory = require("ndrmaa").SchedulerFactory;
+var SessionManager = require("ndrmaa").SessionManager;
+```
+
+Once imported, you will be able to instantiate SchedulerFactory and SessionManager instances like this:
+
+```
+var sf = new SchedulerFactory();
+var sm = new SessionManager();
+```
 
 Extensive documentation in JSDoc format can be found in the documentation.tar.gz file. A tutorial is also present: it features an explanation of the instantiation and the configuration of a SchedulerManager instance (the class handling job submissions), a basic example of usage of SchedulerManager and an in-depth explanation of what actually goes on before, during, and after a request is received by the module.

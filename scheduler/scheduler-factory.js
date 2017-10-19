@@ -1,11 +1,11 @@
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * @fileoverview Class that manages instantiation, retrieval and deletion of
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * [SchedulerManager]{@link scheduler/SchedulerManager} objects.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * @author Marco Speronello
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+ * @fileoverview Class that manages instantiation, retrieval and deletion of
+ * [SchedulerManager]{@link scheduler/SchedulerManager} objects.
+ *
+ * @author Marco Speronello
+ */
 
 
 var _schedulerManager = require('./scheduler-manager');
@@ -16,7 +16,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var schedulers_ = [];
 
 /**
- * Class that manages instantiation and retrieval and deletion of
+ * Class that manages instantiation, retrieval and deletion of
  * [SchedulerManager]{@link scheduler/SchedulerManager} objects.
  *
  * @alias scheduler/SchedulerFactory
@@ -36,7 +36,7 @@ var SchedulerFactory = function () {
    * Creates a [SchedulerManager]{@link scheduler/SchedulerManager} object.
    *
    * @param {string} name - The name of the [SchedulerManager]{@link
-   * scheduler/SchedulerManager} to create.
+      * scheduler/SchedulerManager} to create.
    * @param {string} inputFile - The path of the file with the
    * [SchedulerManager]{@link scheduler/SchedulerManager} input parameters.
    * @returns {scheduler/SchedulerManager} The newly created SchedulerManager.
@@ -54,8 +54,8 @@ var SchedulerFactory = function () {
         throw new Error('Name must be a non-empty string.');
       }
       if (schedulers_.findIndex(function (elem) {
-        return elem.name === name;
-      }) !== -1) {
+            return elem.name === name;
+          }) !== -1) {
         console.log('A SchedulerManager instance named "' + name + '" already exists.');
         throw new Error('A SchedulerManager instance named "' + name + '" already exists.');
       }
@@ -74,7 +74,7 @@ var SchedulerFactory = function () {
      * object.
      *
      * @param {string} name - The name of the [SchedulerManager]{@link
-     * scheduler/SchedulerManager} to retrieve.
+        * scheduler/SchedulerManager} to retrieve.
      * @returns {scheduler/SchedulerManager} The specified SchedulerManager.
      * @throws {Error} The name provided was null or an empty string, or a
      * [SchedulerManager]{@link scheduler/SchedulerManager} with this name does
@@ -105,7 +105,7 @@ var SchedulerFactory = function () {
      * object.
      *
      * @param {string} name - The name of the [SchedulerManager]{@link
-     * scheduler/SchedulerManager} to delete.
+        * scheduler/SchedulerManager} to delete.
      * @throws {Error} The name provided was null or an empty string, or a
      * [SchedulerManager]{@link scheduler/SchedulerManager} with this name does
      * not exist.

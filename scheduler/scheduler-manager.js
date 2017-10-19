@@ -6,11 +6,11 @@ Object.defineProperty(exports, "__esModule", {
 exports.JOB_TYPE = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * @fileoverview Class that manages client requests to submit a job to the Sun
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Grid Engine.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      *
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * @author Marco Speronello
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+ * @fileoverview Class that manages client requests to submit a job to the Sun
+ * Grid Engine.
+ *
+ * @author Marco Speronello
+ */
 
 var _fs = require('fs');
 
@@ -69,12 +69,11 @@ var JOB_TYPE = exports.JOB_TYPE = {
  *
  * INSTANTIATION:<br>
  * Instances of this class are created by the [createSchedulerManager]{@link
- * scheduler/SchedulerFactory#createSchedulerManager} method of
- * [SchedulerFactory]
- * {@link scheduler/SchedulerFactory}. The input file, whose path
- * is passed to the constructor, is read in order to configure the class
- * parameters. Said file is then read every time a request is received by the
- * server (provided the last read happened a long enough time ago), so
+    * scheduler/SchedulerFactory#createSchedulerManager} method of
+ * [SchedulerFactory]{@link scheduler/SchedulerFactory}. The input file,
+ * whose path is passed to the constructor, is read in order to configure the
+ * class parameters. Said file is then read every time a request is received by
+ * the server (provided the last read happened a long enough time ago), so
  * reconfiguration of input parameters during runtime is supported.
  * Refer to the sample file and the constructor comments for further details
  * regarding the input parameters.
@@ -106,7 +105,7 @@ var SchedulerManager = function () {
    * parameters are specified within it, the missing parameters are initialized
    * to default values.
    * @param {string} inputFile - The path of the file with the input parameters.
-   * @param {string} name - The name of this instance of SchedulerManager
+   * @param {string} name - The name of this instance of SchedulerManager.
    */
   function SchedulerManager(name, inputFile) {
     _classCallCheck(this, SchedulerManager);
@@ -133,13 +132,13 @@ var SchedulerManager = function () {
     this.pendingJobsCounter_ = 0;
     /** User history, consisting of the users who have not exceeded their
      * maximum lifespan ([userLifespan]{@link
-     * scheduler/SchedulerManager#userLifespan}).
+        * scheduler/SchedulerManager#userLifespan}).
      * @type {array}
      */
     this.users = [];
     /** Recent request history by all users, consisting of the request which
      * have not exceeded their maximum lifespan ([requestLifespan]{@link
-     * scheduler/SchedulerManager#requestLifespan_}).
+        * scheduler/SchedulerManager#requestLifespan_}).
      * @type {array}
      * @private
      */
@@ -156,15 +155,15 @@ var SchedulerManager = function () {
     this.whitelist_ = [];
     /** Current setInterval ID of the [monitorUsers]{@link
         * modules:scheduler/monitors.monitorUsers} function, called in
-     * [updateMonitors_]{@link scheduler/SchedulerManager.updateMonitors_}.
+     * [updateMonitors_]{@link scheduler/SchedulerManager#updateMonitors_}.
      * @type {number}
      * @default null
      * @private
      */
     this.userPollingIntervalID_ = null;
     /** Current setInterval ID of the [updateLists_]{@link
-        * scheduler/SchedulerManager.updateLists_} function, called in
-     * [updateMonitors_]{@link scheduler/SchedulerManager.updateMonitors_}.
+        * scheduler/SchedulerManager#updateLists_} function, called in
+     * [updateMonitors_]{@link scheduler/SchedulerManager#updateMonitors_}.
      * @type {number}
      * @default null
      * @private
@@ -383,12 +382,12 @@ var SchedulerManager = function () {
         }
         // One or more constraints were violated. The job cannot be submitted.
         else {
-            // The counter is decreased because the request has been rejected.
-            _this.pendingJobsCounter_--;
-            requestOutcome.description = 'Request rejected.';
-            requestOutcome.errors = verifyOutcome.errors;
-            reject(requestOutcome);
-          }
+          // The counter is decreased because the request has been rejected.
+          _this.pendingJobsCounter_--;
+          requestOutcome.description = 'Request rejected.';
+          requestOutcome.errors = verifyOutcome.errors;
+          reject(requestOutcome);
+        }
       });
     }
 
@@ -511,7 +510,7 @@ var SchedulerManager = function () {
 
     /**
      * Removes the job specified by jobId from the job history ([jobs_]{@link
-     * scheduler/SchedulerManager#jobs_}).
+        * scheduler/SchedulerManager#jobs_}).
      * @param {number} jobId - The id of the job to remove.
      * @public
      */
@@ -566,7 +565,7 @@ var SchedulerManager = function () {
 
     /**
      * Verifies if a request can be serviced. The result is contained in a {@link
-     * requestStatus} object.
+        * requestStatus} object.
      *
      * @param {requestData} requestData - Object holding request information.
      * @param {number} userIndex - The corresponding index of the users array of
@@ -678,9 +677,9 @@ var SchedulerManager = function () {
     key: 'isBlacklisted_',
     value: function isBlacklisted_(requestData) {
       if (this.blacklist_.findIndex(function (elem) {
-        var regexp = new RegExp(elem);
-        if (regexp.test(requestData.ip)) return elem;
-      }) !== -1) {
+            var regexp = new RegExp(elem);
+            if (regexp.test(requestData.ip)) return elem;
+          }) !== -1) {
         console.log('User ' + requestData.ip + ' is blacklisted.');
         return true;
       }
@@ -699,9 +698,9 @@ var SchedulerManager = function () {
     key: 'isWhitelisted_',
     value: function isWhitelisted_(requestData) {
       if (this.whitelist_.findIndex(function (elem) {
-        var regexp = new RegExp(elem);
-        if (regexp.test(requestData.ip)) return elem;
-      }) !== -1) {
+            var regexp = new RegExp(elem);
+            if (regexp.test(requestData.ip)) return elem;
+          }) !== -1) {
         console.log('User ' + requestData.ip + ' is whitelisted.');
         return true;
       }
@@ -713,14 +712,13 @@ var SchedulerManager = function () {
      * valid.
      * If there are no logical errors but the sum of the start and increment
      * parameters is bigger than the end parameter, the job is classified as
-     * {@link JOB_TYPE}.SINGLE.
+     * [SINGLE]{@link JOB_TYPE}.
      *
      * @param {number} start - The index of the first task.
      * @param {number} end - The index of the last task.
      * @param {number} increment - The index increment.
-     * @returns {string} {@link JOB_TYPE}.SINGLE if the check fails, {@link
-        * JOB_TYPE}.ARRAY
-     * otherwise.
+     * @returns {string} [SINGLE]{@link JOB_TYPE} if the check fails, [ARRAY]{@link
+        * JOB_TYPE} otherwise.
      * @private
      */
 
@@ -838,7 +836,7 @@ var SchedulerManager = function () {
         /** Maximum time (in ms) allowed to pass after the most recent request
          * of a user before the user is removed from history.
          * @type {number}
-         * @default 100000
+         * @default 1000000
          */
         _this5.userLifespan = _this5.inputParams_.userLifespan * 1000 || 1000000;
         /** Time (in ms) after which a request can be removed from history.
@@ -859,27 +857,27 @@ var SchedulerManager = function () {
          * @default 10000
          * @public
          */
-        _this5.maxJobRunningTime_ = _this5.inputParams_.maxJobRunningTime * 1000 || 10000;
+        _this5.maxJobRunningTime = _this5.inputParams_.maxJobRunningTime * 1000 || 10000;
         /** Time (in ms) after which a QUEUED job can be forcibly stopped.
          * @type {number}
          * @default 10000
          * @public
          */
-        _this5.maxJobQueuedTime_ = _this5.inputParams_.maxJobQueuedTime * 1000 || 10000;
+        _this5.maxJobQueuedTime = _this5.inputParams_.maxJobQueuedTime * 1000 || 10000;
         /** Time (in ms) after which an array job whose first task is RUNNING can
          * be forcibly stopped.
          * @type {number}
          * @default 10000
          * @public
          */
-        _this5.maxArrayJobRunningTime_ = _this5.inputParams_.maxArrayJobRunningTime * 1000 || 10000;
+        _this5.maxArrayJobRunningTime = _this5.inputParams_.maxArrayJobRunningTime * 1000 || 10000;
         /** Time (in ms) after which an array job whose first task is QUEUED can
          * be forcibly stopped.
          * @type {number}
          * @default 10000
          * @public
          */
-        _this5.maxArrayJobQueuedTime_ = _this5.inputParams_.maxArrayJobQueuedTime * 1000 || 10000;
+        _this5.maxArrayJobQueuedTime = _this5.inputParams_.maxArrayJobQueuedTime * 1000 || 10000;
         /** Path of the local black/whitelist file.
          * @type {string}
          * @default ''

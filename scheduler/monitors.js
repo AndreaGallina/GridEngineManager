@@ -5,11 +5,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; /**
-                                                                                                                                                                                                                                                                               * @fileoverview Collection of functions used to monitor the user array and the
-                                                                                                                                                                                                                                                                               * status of submitted jobs, in order to take appropriate action if necessary.
-                                                                                                                                                                                                                                                                               *
-                                                                                                                                                                                                                                                                               * @author Marco Speronello
-                                                                                                                                                                                                                                                                               */
+ * @fileoverview Collection of functions used to monitor the user array and the
+ * status of submitted jobs, in order to take appropriate action if necessary.
+ *
+ * @author Marco Speronello
+ */
 
 exports.monitorUsers = monitorUsers;
 exports.monitorJob = monitorJob;
@@ -21,7 +21,7 @@ var _schedulerManager = require('./scheduler-manager');
 /**
  * Scans the users array and removes users which have been inactive (i.e. have
  * not made a request) for longer than the maximum allotted time
- * ([userLifespan]{@link scheduler/schedulerManager#userLifespan}).
+ * ([userLifespan]{@link scheduler/SchedulerManager#userLifespan}).
  */
 function monitorUsers(scheduler) {
   var currentTime = new Date().getTime();
@@ -65,7 +65,7 @@ function monitorUsers(scheduler) {
 /**
  * Monitors the status of the job whose index is specified by the jobId
  * parameter. The status is checked after a set amount of time, specified by the
- * [jobPollingInterval]{@link scheduler/schedulerManager#jobPollingInterval}
+ * [jobPollingInterval]{@link scheduler/SchedulerManager#jobPollingInterval}
  * parameter, has passed.<br>
  * The promise returned by the function is resolved once a job is in a COMPLETED
  * or ERROR state, otherwise it is rejected.
@@ -176,7 +176,7 @@ function pollJob(jobId, scheduler, session) {
 }
 
 /**
- * Compares the current status of the job (of {@link JOB_TYPE}.SINGLE) specified
+ * Compares the current status of the the [SINGLE]{@link JOB_TYPE} job specified
  * by the index parameter to the one stored in the job history (hence memorized
  * during the previous call of this function or, if the function has not been
  * called before, after the job was submitted) for this job and takes
@@ -190,11 +190,11 @@ function pollJob(jobId, scheduler, session) {
  * (2) the job is in ERROR state --> the job is forcibly terminated and deleted
  * from history;<br>
  * (3) the job was !RUNNING, is still !RUNNING and the time limit for !RUNNING
- * jobs ([maxJobQueuedTime_]{@link
- * scheduler/schedulerManager#maxJobQueuedTime_}) has been exceeded --> the job
+ * jobs ([maxJobQueuedTime]{@link
+    * scheduler/SchedulerManager#maxJobQueuedTime}) has been exceeded --> the job
  * is forcibly terminated and deleted from history;<br>
  * (4) the job was RUNNING, is still RUNNING and the time limit for RUNNING jobs
- * ([maxJobRunningTime_]{@link scheduler/schedulerManager#maxJobRunningTime_})
+ * ([maxJobRunningTime]{@link scheduler/SchedulerManager#maxJobRunningTime})
  * has been exceeded --> the job is forcibly terminated and deleted from
  * history;<br>
  * (5) the job was !COMPLETED and is now COMPLETED --> the job is deleted from
@@ -202,11 +202,11 @@ function pollJob(jobId, scheduler, session) {
  *
  * Note: the submitDate field of the job is used to verify whether any timeouts
  * were hit (points (3) and (4)).<br>
- * Note: given the asynchronicity of this function and the ones which call it,
+ * Note: given the asynchrony of this function and the ones which call it,
  * the updated submitDate field (point (1)) is subjected to unavoidable
  * approximations, whose precision is inversely proportional to the time
  * interval between two subsequent calls of this function (regulated by the
- * [jobPollingInterval]{@link scheduler/schedulerManager#jobPollingInterval}
+ * [jobPollingInterval]{@link scheduler/SchedulerManager#jobPollingInterval}
  * parameter).<br><br>
  *
  * The promise always resolves unless an error occurs.
@@ -262,81 +262,81 @@ function monitorSingleJob(session, scheduler, jobStatus, jobId) {
       // Terminates and removes from history jobs which are in ERROR state or
       // still queued or running after the maximum allotted runtimes.
       else if (jobStatus[jobId].mainStatus !== 'COMPLETED') {
-          var currentTime = new Date().getTime();
+        var currentTime = new Date().getTime();
 
-          // The job is in ERROR state and is deleted.
-          if (jobStatus[jobId].mainStatus === 'ERROR') {
-            console.log('Job ' + jobId + ' (' + jobName + ') is in ' + jobStatus[jobId].mainStatus + ' state.');
-            deleteErrorJob(session, scheduler, jobId).then(function (jobInfo) {
-              resolve({
-                jobId: jobId,
-                jobName: jobName,
-                sessionName: session.sessionName,
-                mainStatus: jobStatus[jobId].mainStatus,
-                subStatus: 'DELETED',
-                exitStatus: jobInfo.exitStatus,
-                errors: jobInfo.errors,
-                failed: jobInfo.failed,
-                description: 'An error occurred.'
-              });
-            }, function (error) {
-              reject(error);
+        // The job is in ERROR state and is deleted.
+        if (jobStatus[jobId].mainStatus === 'ERROR') {
+          console.log('Job ' + jobId + ' (' + jobName + ') is in ' + jobStatus[jobId].mainStatus + ' state.');
+          deleteErrorJob(session, scheduler, jobId).then(function (jobInfo) {
+            resolve({
+              jobId: jobId,
+              jobName: jobName,
+              sessionName: session.sessionName,
+              mainStatus: jobStatus[jobId].mainStatus,
+              subStatus: 'DELETED',
+              exitStatus: jobInfo.exitStatus,
+              errors: jobInfo.errors,
+              failed: jobInfo.failed,
+              description: 'An error occurred.'
             });
-          }
-          // The job exceeded one of the timeouts and is deleted.
-          else if (jobStatus[jobId].mainStatus !== 'RUNNING' && currentTime - submitDate > scheduler.maxJobQueuedTime_ || jobStatus[jobId].mainStatus === 'RUNNING' && currentTime - submitDate > scheduler.maxJobRunningTime_) {
-              console.log('Job ' + jobId + ' (' + jobName + ') has exceeded maximum ' + jobStatus[jobId].mainStatus + ' runtime.');
-              deleteJob(session, scheduler, jobId, jobStatus[jobId].mainStatus === 'RUNNING').then(function (jobInfo) {
-                resolve({
-                  jobId: jobId,
-                  jobName: jobName,
-                  sessionName: session.sessionName,
-                  mainStatus: 'COMPLETED',
-                  subStatus: 'DELETED',
-                  exitStatus: jobStatus[jobId].mainStatus === 'RUNNING' ? jobInfo.exitStatus : null,
-                  errors: ['Maximum ' + jobStatus[jobId].mainStatus + ' runtime exceeded.'],
-                  failed: jobStatus[jobId].mainStatus === 'RUNNING' ? jobInfo.failed : null,
-                  description: 'Maximum ' + jobStatus[jobId].mainStatus + ' runtime exceeded.'
-                });
-              }, function (error) {
-                reject(error);
-              });
-            } else {
-              // The job was running during the previous check and it still is.
-              resolve({
-                jobId: jobId,
-                jobName: jobName,
-                sessionName: session.sessionName,
-                mainStatus: jobStatus[jobId].mainStatus,
-                subStatus: jobStatus[jobId].subStatus,
-                exitStatus: null,
-                errors: null,
-                failed: null,
-                description: 'Job still running.'
-              });
-            }
+          }, function (error) {
+            reject(error);
+          });
         }
-        // Jobs whose execution ended within the maximum allotted runtimes
-        // are removed from history.
-        else if (jobStatus[jobId].mainStatus === 'COMPLETED') {
-            console.log('Job ' + jobId + ' (' + jobName + ') already terminated execution.');
-            session.wait(jobId, 60000).then(function (jobInfo) {
-              resolve({
-                jobId: jobId,
-                jobName: jobName,
-                sessionName: session.sessionName,
-                mainStatus: jobStatus[jobId].mainStatus,
-                subStatus: jobStatus[jobId].subStatus,
-                exitStatus: jobInfo.exitStatus,
-                errors: jobInfo.errors,
-                failed: jobInfo.failed,
-                description: 'Job completed within allotted runtimes.'
-              });
-            }, function (error) {
-              reject('Could not read job status: ' + error);
+        // The job exceeded one of the timeouts and is deleted.
+        else if (jobStatus[jobId].mainStatus !== 'RUNNING' && currentTime - submitDate > scheduler.maxJobQueuedTime || jobStatus[jobId].mainStatus === 'RUNNING' && currentTime - submitDate > scheduler.maxJobRunningTime) {
+          console.log('Job ' + jobId + ' (' + jobName + ') has exceeded maximum ' + jobStatus[jobId].mainStatus + ' runtime.');
+          deleteJob(session, scheduler, jobId, jobStatus[jobId].mainStatus === 'RUNNING').then(function (jobInfo) {
+            resolve({
+              jobId: jobId,
+              jobName: jobName,
+              sessionName: session.sessionName,
+              mainStatus: 'COMPLETED',
+              subStatus: 'DELETED',
+              exitStatus: jobStatus[jobId].mainStatus === 'RUNNING' ? jobInfo.exitStatus : null,
+              errors: ['Maximum ' + jobStatus[jobId].mainStatus + ' runtime exceeded.'],
+              failed: jobStatus[jobId].mainStatus === 'RUNNING' ? jobInfo.failed : null,
+              description: 'Maximum ' + jobStatus[jobId].mainStatus + ' runtime exceeded.'
             });
-            scheduler.removeJobFromHistory(jobId);
-          }
+          }, function (error) {
+            reject(error);
+          });
+        } else {
+          // The job was running during the previous check and it still is.
+          resolve({
+            jobId: jobId,
+            jobName: jobName,
+            sessionName: session.sessionName,
+            mainStatus: jobStatus[jobId].mainStatus,
+            subStatus: jobStatus[jobId].subStatus,
+            exitStatus: null,
+            errors: null,
+            failed: null,
+            description: 'Job still running.'
+          });
+        }
+      }
+      // Jobs whose execution ended within the maximum allotted runtimes
+      // are removed from history.
+      else if (jobStatus[jobId].mainStatus === 'COMPLETED') {
+        console.log('Job ' + jobId + ' (' + jobName + ') already terminated execution.');
+        session.wait(jobId, 60000).then(function (jobInfo) {
+          resolve({
+            jobId: jobId,
+            jobName: jobName,
+            sessionName: session.sessionName,
+            mainStatus: jobStatus[jobId].mainStatus,
+            subStatus: jobStatus[jobId].subStatus,
+            exitStatus: jobInfo.exitStatus,
+            errors: jobInfo.errors,
+            failed: jobInfo.failed,
+            description: 'Job completed within allotted runtimes.'
+          });
+        }, function (error) {
+          reject('Could not read job status: ' + error);
+        });
+        scheduler.removeJobFromHistory(jobId);
+      }
     } catch (error) {
       console.log('Error fetching job ' + jobId + 'from job history.');
       reject('Error fetching job ' + jobId + 'from job history: ' + error);
@@ -345,7 +345,7 @@ function monitorSingleJob(session, scheduler, jobStatus, jobId) {
 }
 
 /**
- * Compares the current status of the job (of {@link JOB_TYPE}.ARRAY) specified
+ * Compares the current status of the [ARRAY]{@link JOB_TYPE} job specified
  * by the index parameter to the one stored in the job history (hence memorized
  * during the previous call of this function or, if the function has not been
  * called before, after the job was submitted) for this job and takes
@@ -361,14 +361,14 @@ function monitorSingleJob(session, scheduler, jobStatus, jobId) {
  * (1) the job is in ERROR state (one or more of its tasks is in ERROR) -->
  * the job is forcibly terminated and deleted from history;<br>
  * (2) the first task of the job was !RUNNING, is still !RUNNING and the time
- * limit for !RUNNING array jobs ([maxArrayJobQueuedTime_]{@link
-    * scheduler/schedulerManager#maxArrayJobQueuedTime_}) has been exceeded -->
+ * limit for !RUNNING array jobs ([maxArrayJobQueuedTime]{@link
+    * scheduler/SchedulerManager#maxArrayJobQueuedTime}) has been exceeded -->
  * the
  * job is forcibly terminated and deleted from history;<br>
  * (3) at least the first task of the job started RUNNING and total execution
  * time of the job has exceeded the time limit for RUNNING array jobs
- * ([maxArrayJobRunningTime_]{@link
-    * scheduler/schedulerManager#maxArrayJobRunningTime_}) --> the job is
+ * ([maxArrayJobRunningTime]{@link
+    * scheduler/SchedulerManager#maxArrayJobRunningTime}) --> the job is
  * forcibly
  * terminated and deleted from history;<br>
  * (4) the job was !COMPLETED and is now COMPLETED --> the job is deleted from
@@ -378,11 +378,11 @@ function monitorSingleJob(session, scheduler, jobStatus, jobId) {
  * the RUNNING time of each task.<br>
  * Note: the runningStart and runningTime fields of each task are used in the
  * computation of the total running time of the job (point (3)).<br>
- * Note: given the asynchronicity of this function and the ones which call it,
+ * Note: given the asynchrony of this function and the ones which call it,
  * the runningStart and runningTime fields of each task are subjected to
  * unavoidable approximations, whose precision is inversely proportional to the
  * time interval between two subsequent calls of this function (regulated by the
- * [jobPollingInterval]{@link scheduler/schedulerManager#jobPollingInterval}
+ * [jobPollingInterval]{@link scheduler/SchedulerManager#jobPollingInterval}
  * parameter).<br><br>
  *
  * The promise always resolves unless an error occurs.
@@ -441,7 +441,7 @@ function monitorArrayJob(session, scheduler, jobStatus, jobId) {
           var currentTime = new Date().getTime();
           // If the first task is still not running after the maximum allotted
           // queued time, the job is deleted and removed from history.
-          if (jobStatus[jobId].tasksStatus[firstTaskId].mainStatus !== 'COMPLETED' && jobStatus[jobId].tasksStatus[firstTaskId].mainStatus !== 'RUNNING' && currentTime - submitDate > scheduler.maxArrayJobQueuedTime_) {
+          if (jobStatus[jobId].tasksStatus[firstTaskId].mainStatus !== 'COMPLETED' && jobStatus[jobId].tasksStatus[firstTaskId].mainStatus !== 'RUNNING' && currentTime - submitDate > scheduler.maxArrayJobQueuedTime) {
             console.log('Job ' + jobId + ' (' + jobName + ') has exceeded maximum ' + jobStatus[jobId].tasksStatus[firstTaskId].mainStatus + ' runtime. Terminating.');
             deleteJob(session, scheduler, jobId, false).then(function () {
               resolve({
@@ -480,40 +480,40 @@ function monitorArrayJob(session, scheduler, jobStatus, jobId) {
                 // If the task was running during the previous check and it still
                 // is, the total execution time of the job is updated accordingly.
                 else {
-                    // Running time as of the previous check.
-                    var previousRunningTime = taskInfo[taskIndex].runningTime;
-                    // If the runningStart parameter is equal to 0 then the task
-                    // started directly as RUNNING and the task can be considered to
-                    // have approximately started running at the current time. The
-                    // runningStart parameter is updated to reflect this assumption.
-                    taskInfo[taskIndex].runningStart = taskInfo[taskIndex].runningStart === 0 ? currentTime : taskInfo[taskIndex].runningStart;
-                    // The running time of the task is calculated using the current
-                    // time and the time at which the task switched to RUNNING.
-                    taskInfo[taskIndex].runningTime = currentTime - taskInfo[taskIndex].runningStart;
-                    // The total execution time of the job is updated.
-                    totalExecutionTime += taskInfo[taskIndex].runningTime - previousRunningTime;
+                  // Running time as of the previous check.
+                  var previousRunningTime = taskInfo[taskIndex].runningTime;
+                  // If the runningStart parameter is equal to 0 then the task
+                  // started directly as RUNNING and the task can be considered to
+                  // have approximately started running at the current time. The
+                  // runningStart parameter is updated to reflect this assumption.
+                  taskInfo[taskIndex].runningStart = taskInfo[taskIndex].runningStart === 0 ? currentTime : taskInfo[taskIndex].runningStart;
+                  // The running time of the task is calculated using the current
+                  // time and the time at which the task switched to RUNNING.
+                  taskInfo[taskIndex].runningTime = currentTime - taskInfo[taskIndex].runningStart;
+                  // The total execution time of the job is updated.
+                  totalExecutionTime += taskInfo[taskIndex].runningTime - previousRunningTime;
 
-                    console.log('Task ' + taskId + ' of job ' + jobId + ' current running time: ' + new Date(taskInfo[taskIndex].runningTime) + '.');
-                    console.log('Total execution time of job ' + jobId + ' (' + jobName + '): ' + totalExecutionTime + '.');
-                  }
+                  console.log('Task ' + taskId + ' of job ' + jobId + ' current running time: ' + new Date(taskInfo[taskIndex].runningTime) + '.');
+                  console.log('Total execution time of job ' + jobId + ' (' + jobName + '): ' + totalExecutionTime + '.');
+                }
               }
               // The task is now COMPLETED and it was not during the previous
               // check.
               // The total execution time of the job and the status of the task
               // are updated accordingly.
               else if (jobStatus[jobId].tasksStatus[taskId].mainStatus === 'COMPLETED') {
-                  var _previousRunningTime = taskInfo[taskIndex].runningTime;
-                  taskInfo[taskIndex].runningTime = currentTime - taskInfo[taskIndex].runningStart;
-                  totalExecutionTime += taskInfo[taskIndex].runningTime - _previousRunningTime;
+                var _previousRunningTime = taskInfo[taskIndex].runningTime;
+                taskInfo[taskIndex].runningTime = currentTime - taskInfo[taskIndex].runningStart;
+                totalExecutionTime += taskInfo[taskIndex].runningTime - _previousRunningTime;
 
-                  console.log('Task ' + taskId + ' status of job ' + jobId + ' changed from ' + taskInfo[taskIndex].status + ' to ' + jobStatus[jobId].tasksStatus[taskId].mainStatus + '.');
-                  console.log('Task ' + taskId + ' of job ' + jobId + ' completed execution in: ' + new Date(taskInfo[taskIndex].runningTime) + '.');
-                  console.log('Total execution time of job ' + jobId + ' (' + jobName + '): ' + totalExecutionTime + '.');
-                  taskInfo[taskIndex].status = jobStatus[jobId].tasksStatus[taskId].mainStatus;
-                }
+                console.log('Task ' + taskId + ' status of job ' + jobId + ' changed from ' + taskInfo[taskIndex].status + ' to ' + jobStatus[jobId].tasksStatus[taskId].mainStatus + '.');
+                console.log('Task ' + taskId + ' of job ' + jobId + ' completed execution in: ' + new Date(taskInfo[taskIndex].runningTime) + '.');
+                console.log('Total execution time of job ' + jobId + ' (' + jobName + '): ' + totalExecutionTime + '.');
+                taskInfo[taskIndex].status = jobStatus[jobId].tasksStatus[taskId].mainStatus;
+              }
               // If the job total execution time has exceeded the maximum value,
               // the job is terminated and removed from history.
-              if (totalExecutionTime > scheduler.maxArrayJobRunningTime_) {
+              if (totalExecutionTime > scheduler.maxArrayJobRunningTime) {
                 console.log('Job ' + jobId + ' (' + jobName + ') has exceeded maximum RUNNING runtime. Terminating.');
                 deleteJob(session, scheduler, jobId, true).then(function (jobInfo) {
                   resolve({
@@ -571,24 +571,24 @@ function monitorArrayJob(session, scheduler, jobStatus, jobId) {
         }
         // The job as a whole is now COMPLETED. The job is removed from history.
         else if (jobStatus[jobId].mainStatus === 'COMPLETED') {
-            console.log('Job ' + jobId + ' (' + jobName + ') already terminated execution.');
-            session.wait(jobId, 60000).then(function (jobInfo) {
-              resolve({
-                jobId: jobId,
-                jobName: jobName,
-                sessionName: session.sessionName,
-                mainStatus: jobStatus[jobId].mainStatus,
-                subStatus: jobStatus[jobId].subStatus,
-                exitStatus: jobInfo.exitStatus,
-                errors: jobInfo.errors,
-                failed: jobInfo.failed,
-                description: 'Job completed within allotted runtimes.'
-              });
-            }, function (error) {
-              reject('Could not read job status: ' + error);
+          console.log('Job ' + jobId + ' (' + jobName + ') already terminated execution.');
+          session.wait(jobId, 60000).then(function (jobInfo) {
+            resolve({
+              jobId: jobId,
+              jobName: jobName,
+              sessionName: session.sessionName,
+              mainStatus: jobStatus[jobId].mainStatus,
+              subStatus: jobStatus[jobId].subStatus,
+              exitStatus: jobInfo.exitStatus,
+              errors: jobInfo.errors,
+              failed: jobInfo.failed,
+              description: 'Job completed within allotted runtimes.'
             });
-            scheduler.removeJobFromHistory(jobId);
-          }
+          }, function (error) {
+            reject('Could not read job status: ' + error);
+          });
+          scheduler.removeJobFromHistory(jobId);
+        }
       }();
 
       if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;

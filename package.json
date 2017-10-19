@@ -1,6 +1,6 @@
 {
   "name": "ndrmaa",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "A NodeJS DRMAA for Sun Grid Engine.",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,11 @@
   },
   "keywords": [
     "drmaa",
-    "sge"
+    "sge",
+    "sun grid engine",
+    "scheduler",
+    "scheduling",
+    "job"
   ],
   "author": "Andrea Gallina, Marco Andrea Speronello",
   "contributors": [

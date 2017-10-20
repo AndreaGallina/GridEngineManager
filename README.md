@@ -2,7 +2,8 @@
 
 nDrmaa is a NodeJs module to manage job submissions to the Sun Grid Engine (SGE) and the monitoring of submitted jobs.
 
-Several parameters can be configured in order to automatically allow or reject job submission requests. A proper setup of said parameters can be exploited to ensure the system only accepts the requests that do not violate any of the specified constraints. Once a job is submitted to the SGE, the monitoring process takes care of notifying the submitter of the request of any meaningful events, such as the (un)successful completion of a job or the violation of any job-related constraints (i.e. the job has been running/queued for longer than the specified maximum time) and the subsequent deletion of the job.
+Several parameters can be configured in order to automatically allow or reject job submission requests. A proper setup of said parameters can be exploited to ensure the system only accepts the requests that do not violate any of the constraints implemented by the module, such as the possibility to black/whitelist users, limit the number of requests a specific user or all users can issue within a certain amount of time, or limiting the number of jobs that can be handled concurrently by the SGE.
+Once a job is submitted to the SGE, the monitoring process takes care of notifying the submitter of the request of any meaningful events, such as the (un)successful completion of a job or the violation of any job-related constraints (the job has been running/queued for longer than the user-specified maximum time) and the subsequent deletion of the job.
 
 nDrmaa includes a library, which adheres to Drmaa standards for the most part, used by the module itself to communicate with the SGE, providing a quick and safe way to perform all manners of scheduling operations programmatically instead of resorting to shell commands.
 
